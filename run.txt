@@ -1,0 +1,7 @@
+source venv/bin/activate
+pip install fastapi uvicorn websockets aiosqlite
+pip install jinja2
+clear
+python3 run_all.py
+
+
