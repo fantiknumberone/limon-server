@@ -1,138 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Карта уровня сигнала</title>
+    <title>Карта сигнала</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Стили карты -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f0f0;
-        }
-        
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; }
+        #map { height: 100vh; width: 100%; }
         .info-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            max-width: 300px;
-            min-width: 200px;
+            position: absolute; top: 20px; right: 20px;
+            background: white; padding: 15px; border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;
+            max-width: 150px;
         }
-        
-        .info-panel h2 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-        
-        .stats {
-            margin: 10px 0;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        
-        .controls {
-            margin-top: 15px;
-        }
-        
+        .stats { margin: 10px 0; font-size: 14px; }
         button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-right: 5px;
+            background: #4CAF50; color: white; border: none;
+            padding: 8px 15px; border-radius: 5px; cursor: pointer;
+            font-size: 14px; width: 100%;
         }
-        
-        button:hover {
-            background: #45a049;
-        }
-        
-        .signal-legend {
-            margin-top: 10px;
-            font-size: 12px;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin: 3px 0;
-        }
-        
-        .legend-color {
-            width: 15px;
-            height: 15px;
-            margin-right: 8px;
-            border-radius: 3px;
-        }
+        button:hover { background: #45a049; }
     </style>
 </head>
 <body>
-    <!-- Панель информации -->
     <div class="info-panel">
-        <h2>📡 Карта сигнала</h2>
-        
         <div class="stats" id="stats">
-            Загрузка данных...
+            Загрузка...
         </div>
         
-        <div class="controls">
-            <button onclick="loadMap()">🔄 Обновить</button>
-            <button onclick="clearMap()">🗑️ Очистить</button>
-        </div>
-        
-        <!-- Легенда -->
-        <div class="signal-legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background: blue;"></div>
-                <span>Слабый сигнал (1-2)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: cyan;"></div>
-                <span>Средний (3)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: lime;"></div>
-                <span>Хороший (4)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: red;"></div>
-                <span>Отличный (5)</span>
-            </div>
-        </div>
-        
-        <!-- УБРАЛ ЭТУ СТРОКУ: "Данные обновляются в реальном времени" -->
+        <button onclick="loadMap()">Обновить</button>
     </div>
     
-    <!-- Контейнер для карты -->
     <div id="map"></div>
     
-    <!-- Библиотеки -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-    
-    <!-- Наш JavaScript -->
     <script src="/static/map.js"></script>
 </body>
 </html>

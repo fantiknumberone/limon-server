@@ -1,81 +1,85 @@
 #!/usr/bin/env python3
+
 import subprocess
-import sys
 import time
-import os
+import sys
+import socket
 from pathlib import Path
 
+def is_port_in_use(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
+
+def kill_process_on_port(port):
+    try:
+        result = subprocess.run(
+            f"lsof -ti:{port}",
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+        if result.stdout:
+            pids = result.stdout.strip().split()
+            for pid in pids:
+                subprocess.run(f"kill -9 {pid}", shell=True)
+            time.sleep(1)
+    except Exception:
+        pass
+
 def run_in_background(name, command):
-    """Запуск в фоне без чтения вывода"""
-    print(f"🚀 Запуск {name}...")
     return subprocess.Popen(
         command,
         shell=True,
-        stdout=subprocess.DEVNULL,  # не читаем вывод
-        stderr=subprocess.DEVNULL,
-        start_new_session=True  # запуск в новой сессии
+        stdout=sys.stdout,
+        stderr=subprocess.STDOUT,
+        start_new_session=True
     )
 
 def main():
-    print("=" * 50)
-    print("🎯 Система карты сигнала")
-    print("=" * 50)
-    
     base_dir = Path(__file__).parent
-    
-    # Проверяем установлены ли пакеты
-    try:
-        import jinja2
-        import fastapi
-        print(" Все пакеты установлены")
-    except ImportError as e:
-        print(f"❌ Не установлен пакет: {e}")
-        print(" Установите: pip install jinja2 fastapi uvicorn websockets aiosqlite")
-        return
-    
-    # Запускаем серверы
     processes = []
     
+    kill_process_on_port(5555)
+    kill_process_on_port(8001)
+    
+    if is_port_in_use(5555):
+        zmq_port = 5556
+    else:
+        zmq_port = 5555
+    
+    if is_port_in_use(8001):
+        web_port = 8002
+    else:
+        web_port = 8001
+    
     try:
-        # 1. WebSocket сервер
-        ws_proc = run_in_background(
-            "WebSocket для Android",
-            f"cd {base_dir} && python3 ws_server.py"
+        zmq_proc = run_in_background(
+            f"ZMQ Server порт {zmq_port}",
+            f"cd {base_dir} && python3 zmq_server.py --port {zmq_port}"
         )
-        processes.append(("WebSocket", ws_proc))
+        processes.append(("ZMQ Server", zmq_proc, zmq_port))
         time.sleep(2)
         
-        # 2. Веб-сервер
         web_proc = run_in_background(
-            "Веб-сервер",
-            f"cd {base_dir} && python3 web_server.py"
+            f"Веб-сервер порт {web_port}",
+            f"cd {base_dir} && python3 web_server.py --port {web_port}"
         )
-        processes.append(("Веб-сервер", web_proc))
+        processes.append(("Веб-сервер", web_proc, web_port))
         time.sleep(3)
         
-        print("\n" + "=" * 50)
-        print("✅ Все серверы запущены:")
-        print(f"   📡 Android: ws://0.0.0.0:8000")
-        print(f"   🌐 Браузер: http://localhost:8001")
-        print(f"   📊 API: http://localhost:8001/api/data")
-        print("\n🛑 Нажмите Ctrl+C для остановки")
-        print("=" * 50)
-        
-        # Бесконечное ожидание
         while True:
-            time.sleep(1)
+            time.sleep(5)
             
     except KeyboardInterrupt:
-        print("\n\n🛑 Остановка серверов...")
-        for name, proc in processes:
+        for name, proc, port in processes:
             if proc:
                 proc.terminate()
-                print(f"⏹️ Остановлен: {name}")
-        print("✅ Все серверы остановлены")
+                proc.wait()
+        print(" Все серверы остановлены")
         
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
-        for _, proc in processes:
+        print(f" Ошибка: {e}")
+        for _, proc, _ in processes:
             if proc:
                 proc.terminate()
 
